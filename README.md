@@ -59,13 +59,13 @@ https://github.com/etng/obsidian-asset-resolver
 
 打开 Obsidian 设置，进入 `Asset Resolver`。
 
-默认情况下，插件会优先读取 vault 内的配置文件：
+默认情况下，插件使用自己的 Obsidian 配置文件：
 
 ```text
-config/obsidian-asset-resolver.config.json
+.obsidian/plugins/obsidian-asset-resolver/data.json
 ```
 
-如果你希望把真实后端配置集中放在 vault 的 `config/` 目录，可以让插件目录里的 `data.json` 只保留：
+如果你确实希望把真实后端配置集中放在另一个 vault 内 JSON 文件，也可以让插件目录里的 `data.json` 只保留：
 
 ```json
 {

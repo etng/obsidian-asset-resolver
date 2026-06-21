@@ -3,7 +3,7 @@ const { Plugin, PluginSettingTab, Setting, requestUrl } = require("obsidian");
 const DEFAULT_SETTINGS = {
   enabled: true,
   failoverDelayMs: 400,
-  settingsPath: "config/obsidian-asset-resolver.config.json",
+  settingsPath: "",
   manifestPath: "",
   localPrefixes: ["../assets/", "./assets/", "assets/"],
   backends: [],

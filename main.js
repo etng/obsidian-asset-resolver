@@ -3,6 +3,7 @@ const { Plugin, PluginSettingTab, Setting, requestUrl } = require("obsidian");
 const DEFAULT_SETTINGS = {
   enabled: true,
   failoverDelayMs: 400,
+  settingsPath: "config/obsidian-asset-resolver.config.json",
   manifestPath: "",
   localPrefixes: ["../assets/", "./assets/", "assets/"],
   backends: [],
@@ -14,8 +15,13 @@ module.exports = class AssetResolverPlugin extends Plugin {
     this.resolvedUrlCache = new Map();
     this.assetMetadataByRemoteKey = new Map();
     this.assetMetadataByAssetKey = new Map();
+    const savedSettings = Object.assign({}, await this.loadData());
+    const settingsPath = String(
+      savedSettings.settingsPath || DEFAULT_SETTINGS.settingsPath || ""
+    ).trim();
+    const externalSettings = await this.loadExternalSettings(settingsPath);
     this.settings = this.normalizeSettings(
-      Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
+      Object.assign({}, DEFAULT_SETTINGS, savedSettings, externalSettings, { settingsPath })
     );
     await this.loadAssetManifest();
 
@@ -32,12 +38,40 @@ module.exports = class AssetResolverPlugin extends Plugin {
     return {
       enabled: settings.enabled !== false,
       failoverDelayMs: Number(settings.failoverDelayMs) || 400,
+      settingsPath: String(settings.settingsPath || "").trim(),
       manifestPath: String(settings.manifestPath || "").trim(),
       localPrefixes: this.normalizeLines(settings.localPrefixes).map((prefix) =>
         prefix.replace(/\\/g, "/")
       ),
       backends: this.normalizeBackends(settings.backends),
     };
+  }
+
+  async loadExternalSettings(settingsPath) {
+    const path = String(settingsPath || "").trim();
+    if (!path) {
+      return {};
+    }
+
+    try {
+      const text = await this.app.vault.adapter.read(path);
+      const data = JSON.parse(text);
+      return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  async saveExternalSettings(settingsPath, settings) {
+    const path = String(settingsPath || "").trim();
+    if (!path) {
+      return;
+    }
+
+    await this.app.vault.adapter.write(
+      path,
+      JSON.stringify(settings, null, 2) + "\n"
+    );
   }
 
   normalizeLines(value) {
@@ -1026,7 +1060,12 @@ module.exports = class AssetResolverPlugin extends Plugin {
 
   async saveSettings() {
     this.settings = this.normalizeSettings(this.settings);
-    await this.saveData(this.settings);
+    if (this.settings.settingsPath) {
+      await this.saveExternalSettings(this.settings.settingsPath, this.settings);
+      await this.saveData({ settingsPath: this.settings.settingsPath });
+    } else {
+      await this.saveData(this.settings);
+    }
     await this.loadAssetManifest();
     this.processExistingMarkdown();
   }

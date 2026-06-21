@@ -1,0 +1,9 @@
+{
+  "id": "obsidian-asset-resolver",
+  "name": "Asset Resolver",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Show missing local images from your own remote asset mirrors.",
+  "author": "etng",
+  "isDesktopOnly": false
+}

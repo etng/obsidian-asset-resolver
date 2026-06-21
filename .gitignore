@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+
+# Local Obsidian settings and private asset indexes
+data.json
+asset_manifest.json
+asset_manifest.jsonl
+*.local.json
+*.local.jsonl
+
+# Build and package outputs
+dist/
+*.zip
